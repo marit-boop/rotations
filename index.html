@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>Rotacje</title>
+<link rel="stylesheet" href="app.css">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Rotacje">
+<meta name="theme-color" content="#E8EEEC" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0A141B" media="(prefers-color-scheme: dark)">
+</head>
+<body>
+<header class="bar">
+  <button class="plan-btn" id="planBtn" aria-label="Zmień scenariusz">
+    <span class="plan-k" id="planK">Scenariusz</span>
+    <span class="plan-n" id="planName">–</span>
+  </button>
+  <div class="yr" id="yearSwitch">
+    <button class="ib" data-yr="-1" aria-label="Poprzedni rok">‹</button>
+    <span id="yearLabel">–</span>
+    <button class="ib" data-yr="1" aria-label="Następny rok">›</button>
+  </div>
+</header>
+
+<main id="view" tabindex="-1"></main>
+
+<nav class="tabs" id="tabs">
+  <button data-tab="pulpit"><svg viewBox="0 0 24 24"><path d="M4 15a8 8 0 0 1 16 0"/><path d="M12 15l4-5"/><circle cx="12" cy="15" r="1.4"/></svg><span>Pulpit</span></button>
+  <button data-tab="kalendarz"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><span>Kalendarz</span></button>
+  <button data-tab="grafik"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h10M4 17h13"/></svg><span>Grafik</span></button>
+  <button data-tab="finanse"><svg viewBox="0 0 24 24"><path d="M5 19V11M10 19V6M15 19v-5M20 19V9"/></svg><span>Finanse</span></button>
+  <button data-tab="ustawienia"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg><span>Ustawienia</span></button>
+</nav>
+
+<div class="scrim" id="scrim" hidden></div>
+<section class="sheet" id="sheet" hidden role="dialog" aria-modal="true">
+  <div class="grab"></div>
+  <div class="sheet-h"><h2 id="sheetTitle"></h2><button class="ib close" id="sheetClose" aria-label="Zamknij">✕</button></div>
+  <div class="sheet-b" id="sheetBody"></div>
+</section>
+<div class="toast" id="toast" hidden></div>
+<input type="file" id="fileIn" hidden>
+
+<script src="i18n-data.js"></script>
+<script src="i18n.js"></script>
+<script src="engine.js"></script>
+<script src="app.js"></script>
+<script src="sync.js"></script>
+<script>if (location.protocol === 'https:' && 'serviceWorker' in navigator) addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => { }));</script>
+</body>
+</html>
