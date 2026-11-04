@@ -45,6 +45,8 @@ function sample() {   // pusta aplikacja: jeden pusty scenariusz
   return { v: 5, updated: 0, settings: JSON.parse(JSON.stringify(E.DEFAULT_SETTINGS)), plans: [a], active: a.id };
 }
 function validState(o) { return o && Array.isArray(o.plans) && o.plans.length && o.plans.every(p => Array.isArray(p.rotations)); }
+/* NAS (PHP) zwraca pusty obiekt {} jako pustą listę [] – do listy nie da się zapisać dni, więc zawsze zamieniamy na obiekt */
+const objOf = x => x && typeof x === 'object' && !Array.isArray(x) ? x : {};
 const numOr = (v, d) => { v = +v; return isFinite(v) ? v : d; };
 function normPay(p, legacy) {   // ustawienia wynagrodzenia scenariusza
   const src = legacy || p, D = E.DEFAULT_PAY;
@@ -68,13 +70,13 @@ function normalize(o) {
     for (const c of ['EUR', 'USD', 'GBP']) if (+old[c] > 0) fx[c + '>PLN'] = +old[c];
     if (!old.EUR) fx['EUR>PLN'] = 4.35;
     home = 'PLN'; showHome = !!os.showPLN;
-  } else for (const k in os.fx || {}) if (/^[A-Z]{3}>[A-Z]{3}$/.test(k) && +os.fx[k] > 0) fx[k] = +os.fx[k];
+  } else for (const k in objOf(os.fx)) if (/^[A-Z]{3}>[A-Z]{3}$/.test(k) && +os.fx[k] > 0) fx[k] = +os.fx[k];
   const settings = { ysM: Math.min(12, Math.max(1, numOr(os.ysM, D.ysM))), ysD: Math.min(31, Math.max(1, numOr(os.ysD, D.ysD))),
     tb: numOr(os.tb, D.tb), ta: numOr(os.ta, D.ta), home, fx, showHome };
   let legacy = null;   // do wersji 1.4 wynagrodzenie było wspólne dla wszystkich scenariuszy
   if (ver < 4) legacy = { ...os, rate: ver < 3 && os.rate === 185 ? 184.48 : numOr(os.rate, 184.48) };
   const st = { v: 5, settings, plans: o.plans.map(p => ({
-    id: p.id || uid(), name: p.name || 'Scenariusz', ...normPay(p, legacy), overrides: p.overrides || {}, hraOff: p.hraOff || {},
+    id: p.id || uid(), name: p.name || 'Scenariusz', ...normPay(p, legacy), overrides: objOf(p.overrides), hraOff: objOf(p.hraOff),
     rotations: p.rotations.filter(r => r.start && r.end).map(r => ({ id: r.id || uid(), type: r.type === 'COURSE' ? 'COURSE' : 'ON',
       start: r.start, end: r.end, tb: +r.tb || 0, ta: +r.ta || 0, note: r.note || '', hra: r.type !== 'COURSE' && r.hra !== false,
       rate: +r.rate > 0 ? +r.rate : null, cur: E.CURRENCIES.includes(r.cur) ? r.cur : null })) })), active: o.active, updated: +o.updated || 0 };
@@ -424,7 +426,7 @@ VIEWS.ustawienia = () => {
     <button class="list-btn" data-act="imp"><span>Wczytaj kopię z pliku</span><small>.json</small></button>
     <button class="list-btn" data-act="csv"><span>Eksportuj prognozę do CSV</span><small>rok ${UI.year}/${String(UI.year + 1).slice(2)}</small></button></div></div>
   <div class="sec"><div class="group"><button class="list-btn" data-act="reset" style="color:var(--neg)"><span>Wyczyść wszystkie dane</span><small>zostaje pusty scenariusz</small></button></div>
-  <p class="note" style="margin-top:14px">Rotacje 2.3. Działa offline.</p></div>`;
+  <p class="note" style="margin-top:14px">Rotacje 2.4. Działa offline.</p></div>`;
 };
 
 /* ---------- plans ---------- */
@@ -518,7 +520,7 @@ function confirmSheet(title, text, ok, cb) {
 }
 $('sheetBody').addEventListener('click', e => { const t = e.target.closest('[data-act]'); if (t && SH && SH.acts[t.dataset.act] && !t.disabled) SH.acts[t.dataset.act](t); });
 $('sheetBody').addEventListener('input', e => { if (SH && SH.onInput) SH.onInput(e.target); });
-$('sheetBody').addEventListener('change', e => { if (SH && SH.onInput && e.target.type === 'date') SH.onInput(e.target); });
+$('sheetBody').addEventListener('change', e => { if (SH && SH.onInput && (e.target.type === 'date' || e.target.type === 'checkbox')) SH.onInput(e.target); });   // iOS: przełączniki zgłaszają 'change'
 $('scrim').addEventListener('click', closeSheet); $('sheetClose').addEventListener('click', closeSheet);
 let toastT;
 function toast(m) { const t = $('toast'); t.textContent = m; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => t.hidden = true, 2600); }
